@@ -1,0 +1,25 @@
+# Ignore node_modules in both backend and frontend
+/server_backend/node_modules/
+/frontend_client/node_modules/
+/server_backend/certs
+
+# Ignore build/dist folders
+/backend/dist/
+/frontend/dist/
+/frontend/build/
+
+# Ignore env files for backend and frontend
+/server_backend/.env
+/frontend_client/.env
+
+# Logs and temp files
+/server_backend/logs/
+frontend_client/logs/
+*.log
+
+# VSCode settings
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
