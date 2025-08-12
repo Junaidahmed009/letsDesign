@@ -5,14 +5,14 @@ import bcrypt from "bcryptjs";
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
   // Email regex validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Invalid email format" });
-  }
+  // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // if (!emailRegex.test(email)) {
+  //   return res.status(400).json({ message: "Invalid email format" });
+  // }
   try {
     const userexists = await userSchema.findOne({ email });
     if (userexists) {
-      return res.status(400).json({ message: "User Already exists" });
+      return res.status(401).json({ message: "User already exists" });
     }
     const hasedPassword = await bcrypt.hash(password, 10);
     const user = await userSchema.create({
@@ -20,19 +20,9 @@ export const signup = async (req, res) => {
       email,
       password: hasedPassword,
     });
-    // i dont want cookie or jwt bcz i move user to login after that.
-    // const jwttoken = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-    //   expiresIn: "7d",
-    // });
-    // res.cookie("jwt", jwttoken, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "strict",
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
     res.status(201).json({
-      message: "User Registered Susess",
-      user: { _id: user._id, name: user.name, email: user.email },
+      message: "User registered sucess",
+      // user: { _id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -41,18 +31,18 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(401).json({ message: "Creadentials missing" });
-  }
+  // if (!email || !password) {
+  //   return res.status(401).json({ message: "Creadentials missing" });
+  // }
   try {
     const user = await userSchema.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
+      return res.status(402).json({ message: "Invalid password" });
     }
     const jwttoken = jwt.sign(
       { id: user._id, email: user.email },
@@ -65,7 +55,7 @@ export const login = async (req, res) => {
       sameSite: "strict", // protect against CSRF
       maxAge: 1 * 60 * 60 * 1000, // 1 hour
     });
-    res.json({ message: "Login successful" });
+    res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -99,4 +89,12 @@ export const logout = (req, res) => {
     sameSite: "strict",
   });
   res.json({ message: "Logged out successfully" });
+};
+// controllers/authController.js
+export const checkAuth = (req, res) => {
+  // If we reach here, it means authMiddleware has already validated the token
+  res.status(200).json({
+    valid: true,
+    user: req.user, // comes from jwt payload
+  });
 };

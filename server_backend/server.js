@@ -5,6 +5,7 @@ import userRoutes from "./src/Routes/userRoutes.js";
 import https from "https";
 import fs from "fs";
 import connectDb from "./src/configDb/dbConnection.js";
+import cors from "cors";
 
 //for using dotenv to bring variables from .envfile
 dotenv.config();
@@ -13,6 +14,12 @@ const app = express();
 app.use(cookieParser());
 const PORT = process.env.PORT;
 
+app.use(
+  cors({
+    origin: "https://localhost:5173", // your frontend URL
+    credentials: true, // allow cookies/auth headers
+  })
+);
 app.use(express.json());
 connectDb();
 
